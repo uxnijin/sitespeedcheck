@@ -552,20 +552,8 @@
       }
     } catch (e) {
       console.warn('Lighthouse fetch failed', e);
-      
-      const errorMsg = e.message || 'Auditing failed';
-      vFcp.textContent = 'Limit Exceeded';
-      vLcp.textContent = 'Limit Exceeded';
-      vCls.textContent = 'Limit Exceeded';
-      vSpeedIndex.textContent = 'Limit Exceeded';
-
-      // Provide inline suggestion inside vitalsLoading details instead of complete failure
-      const loadingLabel = vitalsLoading.querySelector('span:last-child');
-      if (loadingLabel) {
-        loadingLabel.innerHTML = `<span style="color:var(--bad); font-weight:700;">Rate Limited (429).</span> Please configure an API Key under Advanced Settings to bypass limit.`;
-      }
-      // Keep loading card visible to show the message
-      vitalsGrid.hidden = false;
+      // Hide the entire section if Google API rate limits us or fails to keep the UI clean
+      vitalsSection.hidden = true;
     }
   }
 
