@@ -962,6 +962,18 @@
     }
   }
 
+  // Cursor card spotlights
+  document.addEventListener('mousemove', (e) => {
+    const cards = document.querySelectorAll('.sidebar-card, .input-group, .welcome-panel, .dashboard-card, .history-card, .vital-card, .insight-item, .timing-inspector');
+    cards.forEach(card => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+  });
+
   // UI Event hooks
   compareMode.addEventListener('change', toggleCompareModeUI);
 
