@@ -1,4 +1,41 @@
-const fetch = globalThis.fetch;
+const https = require('https');
+
+function httpsPost(url, body) {
+  return new Promise((resolve, reject) => {
+    const parsedUrl = new URL(url);
+    const options = {
+      hostname: parsedUrl.hostname,
+      path: parsedUrl.pathname + parsedUrl.search,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        resolve({
+          ok: res.statusCode >= 200 && res.statusCode < 300,
+          status: res.statusCode,
+          text: () => Promise.resolve(data),
+          json: () => {
+            try {
+              return Promise.resolve(JSON.parse(data));
+            } catch (err) {
+              return Promise.reject(new Error(`Failed to parse JSON: ${data}`));
+            }
+          }
+        });
+      });
+    });
+
+    req.on('error', (e) => reject(e));
+    req.write(JSON.stringify(body));
+    req.end();
+  });
+}
 
 exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
@@ -27,7 +64,7 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Gemini API Key is not configured in environment variables (.env).' })
+      body: JSON.stringify({ error: 'Gemini API Key is not configured in environment variables (GEMINI_API_KEY).' })
     };
   }
 
@@ -62,18 +99,13 @@ URL: ${params.url}
 Provide a concise 3-4 sentence performance summary. Highlight the primary bottlenecks and suggest the absolute single most impactful optimization they should implement immediately. Use bold highlights (using **double asterisks**) for key stats or actions. Keep the tone friendly, professional, and actionable.`;
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+    const response = await httpsPost(apiUrl, {
+      contents: [{
+        parts: [{
+          text: prompt
         }]
-      })
+      }]
     });
 
     if (!response.ok) {
@@ -99,7 +131,7 @@ Provide a concise 3-4 sentence performance summary. Highlight the primary bottle
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ error: error.message, stack: error.stack })
     };
   }
 };
