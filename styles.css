@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-  --bg: #08070d;
-  --bg-2: #0f0e15;
-  --card: rgba(22, 20, 31, 0.65);
+  --bg: #09090c;
+  --bg-2: #101014;
+  --card: rgba(22, 22, 26, 0.65);
   --line: rgba(255, 255, 255, 0.08);
   --line-soft: rgba(255, 255, 255, 0.04);
   --grey-1: #98979c;
@@ -39,7 +39,7 @@ body {
   align-items: flex-start;
   justify-content: center;
   padding: 48px 20px;
-  background-image: radial-gradient(circle at 50% 0%, #18122b 0%, #08070d 65%);
+  background-image: radial-gradient(circle at 50% 0%, #17171e 0%, #09090c 65%);
 }
 
 .noise {
@@ -147,12 +147,11 @@ body {
   position: relative;
   cursor: pointer;
   outline: none;
-  transition: background .2s ease, box-shadow .2s ease;
+  transition: background .2s ease;
   border: 1px solid var(--line);
 }
 .compare-switch:checked {
   background: var(--accent);
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
 }
 .compare-switch::before {
   content: '';
@@ -236,13 +235,11 @@ body {
   padding: 14px;
   border-radius: 12px;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
   width: 100%;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
 }
 .go:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.35);
   background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
 }
 .go:active {
@@ -252,7 +249,6 @@ body {
   opacity: .5;
   cursor: default;
   transform: none;
-  box-shadow: none;
 }
 
 .note {
@@ -360,8 +356,8 @@ body {
 }
 .tab-btn.active {
   background: var(--line-soft);
-  border-color: var(--line);
-  color: var(--white);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .tab-content {
@@ -702,9 +698,9 @@ body {
   color: var(--ink);
 }
 .filter-btn.active {
-  background: var(--white);
-  color: var(--bg);
-  border-color: var(--white);
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
 }
 
 /* Compare Mode Sub Tabs */
@@ -732,7 +728,7 @@ body {
 .comp-tab:hover { color: var(--ink); }
 .comp-tab.active {
   background: var(--card);
-  color: var(--white);
+  color: var(--accent);
 }
 
 .waterfall {
