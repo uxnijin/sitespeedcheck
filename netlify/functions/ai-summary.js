@@ -86,7 +86,15 @@ Site B: ${params.urlB}
 - Requests: ${params.reqsB}
 - TTFB: ${params.ttfbB} ms
 
-Provide a concise 3-sentence comparison report. Use bold highlights (using **double asterisks**) to identify the winner of the performance duel and specify the single most impactful reason why they won. Keep the tone friendly, professional, and technical.`;
+Respond ONLY with a valid JSON object matching this schema. Do not include markdown formatting or backticks around the JSON.
+{
+  "verdict": "A 1-sentence benchmark summary verdict with an emoji (e.g. 'Site A is a lightweight racer that completely outruns Site B! 🏁')",
+  "bottlenecks": [
+    "Comparison highlight 1 (using metrics highlights like **45% lighter** or **320ms faster**)",
+    "Comparison highlight 2"
+  ],
+  "recommendation": "The most impactful action the slower site should take to bridge the gap (1-2 sentences)."
+}`;
     } else {
       prompt = `You are an expert web performance auditor. Analyze the performance metrics of this site:
 URL: ${params.url}
@@ -96,7 +104,15 @@ URL: ${params.url}
 - TTFB: ${params.ttfbMs} ms
 - Failed Requests: ${params.failedCount}
 
-Provide a concise 3-4 sentence performance summary. Highlight the primary bottlenecks and suggest the absolute single most impactful optimization they should implement immediately. Use bold highlights (using **double asterisks**) for key stats or actions. Keep the tone friendly, professional, and actionable.`;
+Respond ONLY with a valid JSON object matching this schema. Do not include markdown formatting or backticks around the JSON.
+{
+  "verdict": "A 1-sentence engaging summary verdict with an emoji (e.g. 'Your site is built like a bullet train, but some heavy cargo is slowing it down! 🚀')",
+  "bottlenecks": [
+    "Bottleneck 1 (mentioning specific stats like load time or size)",
+    "Bottleneck 2"
+  ],
+  "recommendation": "The absolute single most impactful optimization they should implement immediately (1-2 sentences)."
+}`;
     }
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
@@ -105,7 +121,10 @@ Provide a concise 3-4 sentence performance summary. Highlight the primary bottle
         parts: [{
           text: prompt
         }]
-      }]
+      }],
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
     });
 
     if (!response.ok) {
@@ -116,7 +135,7 @@ Provide a concise 3-4 sentence performance summary. Highlight the primary bottle
     const data = await response.json();
     const summary = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]
       ? data.candidates[0].content.parts[0].text
-      : 'Could not parse response from Gemini API.';
+      : '{"verdict":"Could not parse response.","bottlenecks":[],"recommendation":""}';
 
     return {
       statusCode: 200,

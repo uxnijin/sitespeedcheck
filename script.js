@@ -118,7 +118,32 @@
       }
 
       if (data.summary) {
-        textField.innerHTML = formatMarkdown(data.summary);
+        try {
+          const obj = JSON.parse(data.summary);
+          const verdictHtml = `<div class="ai-verdict">${formatMarkdown(obj.verdict)}</div>`;
+          
+          let bottlenecksHtml = '';
+          if (obj.bottlenecks && obj.bottlenecks.length > 0) {
+            bottlenecksHtml = `
+              <div class="ai-subheader">Key Findings</div>
+              <ul class="ai-findings-list">
+                ${obj.bottlenecks.map(b => `<li><span class="bullet">◍</span> <span>${formatMarkdown(b)}</span></li>`).join('')}
+              </ul>
+            `;
+          }
+
+          const recHtml = `
+            <div class="ai-rec-box">
+              <div class="ai-rec-lbl">Recommended Fix</div>
+              <div class="ai-rec-val">${formatMarkdown(obj.recommendation)}</div>
+            </div>
+          `;
+
+          textField.innerHTML = verdictHtml + bottlenecksHtml + recHtml;
+        } catch (jsonErr) {
+          // Fallback if parsing fails
+          textField.innerHTML = `<div style="font-family: var(--font-display); font-size: 13px; line-height: 1.6; color: var(--ink-dim);">${formatMarkdown(data.summary)}</div>`;
+        }
         loading.hidden = true;
         textField.hidden = false;
       } else {
