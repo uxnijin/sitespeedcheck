@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Speed Test by Nijin</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="noise"></div>
+
+<main class="stage">
+  <div class="dashboard-container">
+    
+    <!-- Sidebar Control Panel -->
+    <aside class="stage-sidebar">
+      <header class="masthead">
+        <span class="mark">◍</span>
+        <span class="brand">SITE SPEED TEST BY NIJIN</span>
+      </header>
+
+      <div class="sidebar-card">
+        <div class="toggle-row">
+          <label for="compareMode">Compare Competitors</label>
+          <input type="checkbox" id="compareMode" class="compare-switch" />
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <label for="testLocation" class="card-label">Test Server Location</label>
+        <select id="testLocation" class="location-select">
+          <option value="us">North America (Virginia)</option>
+          <option value="eu">Europe (Frankfurt) [Simulated]</option>
+          <option value="ap">Asia Pacific (Tokyo) [Simulated]</option>
+        </select>
+      </div>
+
+      <form id="form" class="sidebar-form">
+        <!-- Single Mode Input -->
+        <div class="input-group" id="urlSingleGroup">
+          <label class="card-label">Website URL</label>
+          <input type="text" id="urlInput" placeholder="example.com" autocomplete="off" spellcheck="false" />
+        </div>
+
+        <!-- Compare Mode Inputs -->
+        <div class="input-group" id="urlCompareGroup" hidden>
+          <label class="card-label">Website A URL</label>
+          <input type="text" id="urlInputA" placeholder="my-website.com" autocomplete="off" spellcheck="false" />
+          <label class="card-label" style="margin-top: 8px;">Website B URL</label>
+          <input type="text" id="urlInputB" placeholder="competitor.com" autocomplete="off" spellcheck="false" />
+        </div>
+
+        <button type="submit" id="go" class="go">
+          <span id="goLabel">Test Site</span>
+        </button>
+      </form>
+
+      <!-- Advanced settings for optional Google API key -->
+      <div class="sidebar-card collapsible-card">
+        <details>
+          <summary class="card-label" style="cursor:pointer; margin-bottom:0; display:flex; justify-content:space-between; align-items:center; list-style:none;">
+            Advanced Settings <span style="font-size:9px; color:var(--grey-2);">▼</span>
+          </summary>
+          <div class="details-content" style="margin-top: 12px; display:flex; flex-direction:column; gap:6px;">
+            <label for="apiKeyInput" class="card-label" style="font-size:9px; color:var(--grey-2); margin-bottom:0;">Google PageSpeed API Key (Optional)</label>
+            <input type="password" id="apiKeyInput" placeholder="AIzaSy..." autocomplete="off" spellcheck="false" style="width:100%; background:var(--card); border:1px solid var(--line); border-radius:6px; color:var(--ink); font-family:var(--font-mono); font-size:11px; padding:8px; outline:none;" />
+          </div>
+        </details>
+      </div>
+
+      <p class="note" id="note"></p>
+    </aside>
+
+    <!-- Main Dashboard Area -->
+    <section class="stage-main">
+      
+      <!-- Welcome Idle State Panel -->
+      <div class="welcome-panel" id="welcomePanel">
+        <div class="welcome-card">
+          <h2>Ready to Analyze</h2>
+          <p>Enter a website URL on the left control panel to launch the performance speed audit. This tool compiles page load speeds, response sizes, visual timeline breakdowns, and performance insights.</p>
+          
+          <div class="welcome-features">
+            <div class="feature-item">
+              <span class="feature-icon">◍</span>
+              <div>
+                <h4>Simulate Locations</h4>
+                <p>Simulate request latency profiles from server nodes across USA, Europe, or Asia Pacific.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">◍</span>
+              <div>
+                <h4>Waterfall Timelines</h4>
+                <p>Inspect request streams, parallel asset queues, timings, and HTTP response headers.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">◍</span>
+              <div>
+                <h4>PageSpeed Audits</h4>
+                <p>Asynchronously run authentic Google Lighthouse checks to fetch FCP, LCP, CLS, and Speed Indexes.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">◍</span>
+              <div>
+                <h4>Competitor Battles</h4>
+                <p>Compare two domains side-by-side to benchmark metrics and highlight the winner.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Display on Main Area before Test Runs -->
+        <div class="welcome-history-container" id="welcomeHistoryArea" hidden>
+          <div class="history-trend-card">
+            <h3>Performance Trends (Last 10 Runs)</h3>
+            <div class="trend-chart-container">
+              <svg class="trend-svg" id="welcomeTrendSvg" viewBox="0 0 500 150">
+                <!-- SVG dynamically populated -->
+              </svg>
+            </div>
+          </div>
+          <div class="history-header">
+            <h3>Recent Runs</h3>
+          </div>
+          <div id="welcomeHistoryList" class="history-list"></div>
+        </div>
+      </div>
+
+      <section class="result" id="result" hidden>
+
+        <div class="tabs">
+          <button type="button" class="tab-btn active" id="tab-summary" data-tab="summary">Summary</button>
+          <button type="button" class="tab-btn" id="tab-waterfall" data-tab="waterfall">Waterfall</button>
+          <button type="button" class="tab-btn" id="tab-breakdowns" data-tab="breakdowns">Breakdown</button>
+          <button type="button" class="tab-btn" id="tab-history" data-tab="history">History</button>
+        </div>
+
+        <!-- 1. SUMMARY TAB -->
+        <div class="tab-content" id="content-summary">
+          
+          <!-- AI Performance Summary Card -->
+          <div class="summary-card ai-summary-card" id="aiSummaryCard" hidden>
+            <div class="ai-header">
+              <span class="ai-icon">✦</span>
+              <h3>Gemini AI Performance Audit</h3>
+            </div>
+            <div id="aiSummaryLoading" class="vitals-loading" style="margin-top: 10px; margin-bottom: 0; padding: 12px 14px;">
+              <span class="spinner"></span>
+              <span>Gemini is compiling recommendations...</span>
+            </div>
+            <div id="aiSummaryText" class="ai-summary-text" hidden></div>
+          </div>
+
+          <!-- Single Score Card -->
+          <div class="summary-card" id="singleScoreCard">
+            <div class="score-container">
+              <div class="score-circle">
+                <svg class="score-svg" viewBox="0 0 36 36">
+                  <path class="score-bg-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="score-fg-circle" id="scoreBar" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="score-text">
+                  <span id="scoreGrade">—</span>
+                  <span id="scoreVal">0</span>
+                </div>
+              </div>
+              <div class="score-meta">
+                <h3 id="scoreStatus">Analyzing...</h3>
+                <p id="scoreSummary">Performance grade based on response speeds, request sizes, and file counts.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comparison Score Cards (Side by Side) -->
+          <div class="comparison-scores-container" id="compareScores" hidden>
+            <div class="compare-score-card">
+              <h4 id="compNameA">Site A</h4>
+              <div class="score-circle">
+                <svg class="score-svg" viewBox="0 0 36 36">
+                  <path class="score-bg-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="score-fg-circle" id="scoreBarA" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="score-text">
+                  <span id="scoreGradeA">—</span>
+                  <span id="scoreValA">0</span>
+                </div>
+              </div>
+            </div>
+            <div class="compare-score-card">
+              <h4 id="compNameB">Site B</h4>
+              <div class="score-circle">
+                <svg class="score-svg" viewBox="0 0 36 36">
+                  <path class="score-bg-circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="score-fg-circle" id="scoreBarB" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="score-text">
+                  <span id="scoreGradeB">—</span>
+                  <span id="scoreValB">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Single Metrics Grid -->
+          <div class="headline" id="singleHeadline">
+            <div class="hl-block">
+              <div class="hl-value" id="hlTime">—</div>
+              <div class="hl-label">load time (ms)</div>
+            </div>
+            <div class="hl-block">
+              <div class="hl-value" id="hlSize">—</div>
+              <div class="hl-label">page size</div>
+            </div>
+            <div class="hl-block">
+              <div class="hl-value" id="hlReq">—</div>
+              <div class="hl-label">requests</div>
+            </div>
+          </div>
+
+          <!-- Comparison Metrics Grid -->
+          <div class="compare-metrics-grid" id="compareMetricsGrid" hidden>
+            <div class="compare-metric-row header-row">
+              <span>Metric</span>
+              <span id="colNameA">Site A</span>
+              <span id="colNameB">Site B</span>
+            </div>
+            <div class="compare-metric-row">
+              <span class="metric-label">Performance Score</span>
+              <span id="compScoreA" class="metric-val">—</span>
+              <span id="compScoreB" class="metric-val">—</span>
+            </div>
+            <div class="compare-metric-row">
+              <span class="metric-label">Load Time (ms)</span>
+              <span id="compTimeA" class="metric-val">—</span>
+              <span id="compTimeB" class="metric-val">—</span>
+            </div>
+            <div class="compare-metric-row">
+              <span class="metric-label">Page Size</span>
+              <span id="compSizeA" class="metric-val">—</span>
+              <span id="compSizeB" class="metric-val">—</span>
+            </div>
+            <div class="compare-metric-row">
+              <span class="metric-label">Requests</span>
+              <span id="compReqA" class="metric-val">—</span>
+              <span id="compReqB" class="metric-val">—</span>
+            </div>
+            <div class="compare-metric-row">
+              <span class="metric-label">TTFB</span>
+              <span id="compTtfbA" class="metric-val">—</span>
+              <span id="compTtfbB" class="metric-val">—</span>
+            </div>
+            <div class="compare-metric-row">
+              <span class="metric-label">Failed Requests</span>
+              <span id="compFailedA" class="metric-val">—</span>
+              <span id="compFailedB" class="metric-val">—</span>
+            </div>
+          </div>
+
+          <!-- Lighthouse / Web Vitals section (Single mode only) -->
+          <div class="vitals-section" id="vitalsSection">
+            <h3>Core Web Vitals (Google Lighthouse Audits)</h3>
+            <div id="vitalsLoading" class="vitals-loading" hidden>
+              <span class="spinner"></span>
+              <span>Auditing page performance with Lighthouse...</span>
+            </div>
+            <div id="vitalsGrid" class="vitals-grid">
+              <div class="vital-card">
+                <div class="vital-header">First Contentful Paint</div>
+                <div class="vital-value" id="vFcp">—</div>
+                <div class="vital-desc">Time to render the first text block or image.</div>
+              </div>
+              <div class="vital-card">
+                <div class="vital-header">Largest Contentful Paint</div>
+                <div class="vital-value" id="vLcp">—</div>
+                <div class="vital-desc">Time when main content is fully loaded.</div>
+              </div>
+              <div class="vital-card">
+                <div class="vital-header">Cumulative Layout Shift</div>
+                <div class="vital-value" id="vCls">—</div>
+                <div class="vital-desc">Visual stability index (layout shifts).</div>
+              </div>
+              <div class="vital-card">
+                <div class="vital-header">Speed Index</div>
+                <div class="vital-value" id="vSpeedIndex">—</div>
+                <div class="vital-desc">Speed at which visual assets populate screen.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="insights-section" id="insightsSection">
+            <h3>Performance Insights</h3>
+            <ul id="insightsList" class="insights-list"></ul>
+          </div>
+
+          <!-- Single Meta Info Card -->
+          <div class="meta" id="singleMeta">
+            <div class="meta-row">
+              <span class="meta-key">Final URL</span>
+              <span class="meta-val" id="mUrl">—</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-key">Status</span>
+              <span class="meta-val" id="mStatus">—</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-key">Server</span>
+              <span class="meta-val" id="mServer">—</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-key">TTFB</span>
+              <span class="meta-val" id="mTtfb">—</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-key">Failed requests</span>
+              <span class="meta-val" id="mFailed">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. WATERFALL TAB -->
+        <div class="tab-content" id="content-waterfall" hidden>
+          <div class="waterfall-controls">
+            <input type="text" id="wfSearch" placeholder="Filter by URL..." autocomplete="off" spellcheck="false" />
+            <div class="wf-filters">
+              <button type="button" class="filter-btn active" data-filter="all">All</button>
+              <button type="button" class="filter-btn" data-filter="html">HTML</button>
+              <button type="button" class="filter-btn" data-filter="css">CSS</button>
+              <button type="button" class="filter-btn" data-filter="js">JS</button>
+              <button type="button" class="filter-btn" data-filter="img">Images</button>
+            </div>
+          </div>
+
+          <!-- Split results waterfall navigation for Compare Mode -->
+          <div class="comparison-tabs" id="compareWfTabs" hidden>
+            <button type="button" class="comp-tab active" id="compWfTabA">Site A Timeline</button>
+            <button type="button" class="comp-tab" id="compWfTabB">Site B Timeline</button>
+          </div>
+
+          <div class="waterfall">
+            <div class="wf-head">
+              <span>Resource Name</span>
+              <span>Type</span>
+              <span>Size</span>
+              <span>Timeline (Load Time)</span>
+            </div>
+            <div id="wfBody"></div>
+          </div>
+          <div style="font-family: var(--font-mono); font-size:10px; color: var(--grey-2); text-align:right; margin-top:6px;">
+            * Click resource rows to inspect timing headers.
+          </div>
+        </div>
+
+        <!-- 3. BREAKDOWNS TAB -->
+        <div class="tab-content" id="content-breakdowns" hidden>
+          
+          <div class="comparison-tabs" id="compareBreakdownTabs" hidden>
+            <button type="button" class="comp-tab active" id="compBreakTabA">Site A Breakdown</button>
+            <button type="button" class="comp-tab" id="compBreakTabB">Site B Breakdown</button>
+          </div>
+
+          <div class="breakdown-card">
+            <h3>Weight by Content Type</h3>
+            <div id="typeSizeBar" class="stacked-bar"></div>
+            <div id="typeSizeLegend" class="breakdown-legend"></div>
+          </div>
+
+          <div class="breakdown-card">
+            <h3>Requests by Content Type</h3>
+            <div id="typeReqBar" class="stacked-bar"></div>
+            <div id="typeReqLegend" class="breakdown-legend"></div>
+          </div>
+
+          <div class="breakdown-card">
+            <h3>Domain Breakdown</h3>
+            <div id="domainBar" class="stacked-bar"></div>
+            <div id="domainLegend" class="breakdown-legend"></div>
+          </div>
+        </div>
+
+        <!-- 4. HISTORY TAB -->
+        <div class="tab-content" id="content-history" hidden>
+          
+          <div class="history-trend-card" id="historyTrendCard">
+            <h3>Performance Trends (Last 10 Runs)</h3>
+            <div class="trend-chart-container" id="trendChartContainer">
+              <svg class="trend-svg" id="trendSvg" viewBox="0 0 500 150">
+                <!-- SVG dynamically populated -->
+              </svg>
+            </div>
+          </div>
+
+          <div class="history-header">
+            <h3>Recent Test Runs</h3>
+            <button type="button" class="clear-history-btn" id="clearHistoryBtn">Clear History</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </div>
+
+      </section>
+    </section>
+
+  </div>
+
+  <footer class="foot">
+    designed and developed by <a href="https://nijin.site" target="_blank" rel="noopener">Nijin</a>
+  </footer>
+</main>
+
+<!-- Slide-out Timing Drawer Inspector -->
+<div class="wf-drawer" id="wfDrawer" hidden>
+  <div class="drawer-header">
+    <h3>Resource Headers</h3>
+    <button type="button" class="drawer-close" id="drawerCloseBtn">&times;</button>
+  </div>
+  <div class="drawer-content">
+    <div class="drawer-section">
+      <span class="drawer-lbl">Resource URL</span>
+      <span class="drawer-val url-val" id="dUrl"></span>
+    </div>
+    
+    <div class="drawer-grid">
+      <div class="drawer-section">
+        <span class="drawer-lbl">HTTP Status</span>
+        <span class="drawer-val" id="dStatus"></span>
+      </div>
+      <div class="drawer-section">
+        <span class="drawer-lbl">Type</span>
+        <span class="drawer-val" id="dType"></span>
+      </div>
+      <div class="drawer-section">
+        <span class="drawer-lbl">Payload Size</span>
+        <span class="drawer-val" id="dSize"></span>
+      </div>
+      <div class="drawer-section">
+        <span class="drawer-lbl">Fetch Time</span>
+        <span class="drawer-val" id="dTime"></span>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <span class="drawer-lbl">Compression Audit</span>
+      <div class="compression-status" id="dCompression"></div>
+    </div>
+
+    <div class="drawer-section">
+      <span class="drawer-lbl">HTTP Response Headers</span>
+      <pre class="headers-pre" id="dHeaders"></pre>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
